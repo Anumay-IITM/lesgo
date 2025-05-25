@@ -1,0 +1,29 @@
+name: ISS Location Tracker
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: "0 12 * * *"
+
+jobs:
+  track:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: 23f3002000@ds.study.iitm.ac.in - Fetch ISS Data
+        run: |
+          curl -s http://api.open-notify.org/iss-now.json >> iss-location.jsonl
+          echo "Data fetched successfully!"
+
+      - name: Commit Data
+        run: |
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"
+          git config --global user.name "github-actions[bot]"
+          git add iss-location.jsonl
+          git commit -m "Update ISS data [skip ci]" || exit 0
+          git push
